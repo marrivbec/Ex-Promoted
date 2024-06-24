@@ -95,12 +95,33 @@ const destroy = async function (req, res) {
   }
 }
 
+const promote = async function (req, res) {
+  try {
+    const existRestaurantPromote = await Restaurant.findOne({ where: { userId: req.user.id, promoted: true } })
+    if (existRestaurantPromote) {
+      await Restaurant.update(
+        { promoted: false },
+        { where: { id: existRestaurantPromote.id } }
+      )
+    }
+    await Restaurant.update(
+      { promoted: true },
+      { where: { id: req.params.restaurantId } }
+    )
+    const updatedRestaurant = await Restaurant.findByPk(req.params.restaurantId)
+    res.json(updatedRestaurant)
+  } catch (error) {
+    res.status(500).send(error)
+  }
+}
+
 const RestaurantController = {
   index,
   indexOwner,
   create,
   show,
   update,
-  destroy
+  destroy,
+  promote
 }
 export default RestaurantController
